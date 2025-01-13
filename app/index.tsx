@@ -13,6 +13,7 @@ export default function App() {
   const [isEditting, setIsEditting] = useState(null);
 
   const handleSaveTasks = () => {
+    if(!taskText.trim()) return;
     if (isEditting) {
       const newTasks = tasks.map((task) => {
         return (task.id === isEditting) ? { id: task.id, text: taskText } : task;
