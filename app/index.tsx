@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, FlatList } from "react-native";
+import { Icon } from '@rneui/themed';
 
 interface Task {
   id: string;
@@ -9,11 +10,30 @@ interface Task {
 export default function App() {
   const [taskText, setTaskText] = useState("");
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [isEditting, setIsEditting] = useState(null);
 
-  const handleTasks = () => {
-    const newTask = { id: Date.now().toString(), text: taskText };
-    setTasks([...tasks, newTask]);
+  const handleSaveTasks = () => {
+    if (isEditting) {
+      const newTasks = tasks.map((task) => {
+        return (task.id === isEditting) ? { id: task.id, text: taskText } : task;
+      });
+      setTasks(newTasks);
+      setIsEditting(null);
+    } else {
+      const newTask = { id: Date.now().toString(), text: taskText };
+      setTasks([...tasks, newTask]);
+    }
     setTaskText("");
+  };
+
+  const handleEdit = (item:any) => {
+    setTaskText(item.text);
+    setIsEditting(item.id);
+  };
+
+  const handleDelete = (id: string) => {
+    const newTasks = tasks.filter((task) => task.id !== id);
+    setTasks(newTasks);
   };
 
   const renderTasks = ({ item }:{item: Task}) => {
@@ -22,10 +42,18 @@ export default function App() {
         <Text>{item.text}</Text>
         <View style={styles.taskbuttoncontainer}>
           <TouchableOpacity>
-            <Text>更新</Text>
+            <Icon 
+            name="edit" 
+            color="#0CC"
+            onPress={() => {handleEdit(item)}}
+            >更新</Icon>
           </TouchableOpacity>
           <TouchableOpacity>
-            <Text>削除</Text>
+            <Icon 
+            name="delete" 
+            color="#0CC"
+            onPress={() => {handleDelete(item.id)}}
+            >削除</Icon>
           </TouchableOpacity>
         </View>
       </View>
@@ -42,7 +70,8 @@ export default function App() {
       value={taskText}
       />
       <TouchableOpacity style={styles.touchableButton}>
-        <Text onPress={handleTasks}>追加</Text>
+        <Text 
+        onPress={handleSaveTasks}>{isEditting ? "編集" : "追加"}</Text>
       </TouchableOpacity>
       <FlatList
         data= {tasks}
